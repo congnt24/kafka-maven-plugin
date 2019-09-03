@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,10 @@ public class KafkaStandalone {
         return instance;
     }
 
+    public KafkaStandalone() {
+        System.setProperty("log4j.configurationFile", getClass().getClassLoader().getResource("log4j2.xml").toString());
+    }
+
     private boolean startEmbeddedKafkaServer() {
         Properties kafkaProperties = new Properties();
         Properties zkProperties = new Properties();
@@ -40,13 +45,13 @@ public class KafkaStandalone {
         logger.info("Starting kafka server.");
         try {
             //load properties
-            zkProperties.load(getClass().getResourceAsStream("zookeeper.properties"));
+            zkProperties.load(getClass().getClassLoader().getResourceAsStream("zookeeper.properties"));
             //start local Zookeeper
             // override the Zookeeper client port with the generated one.
             zkProperties.setProperty("clientPort", Integer.toString(zkLocalPort));
             new ZooKeeperLocal(zkProperties);
             logger.info("ZooKeeper instance is successfully started on port " + zkLocalPort);
-            kafkaProperties.load(getClass().getResourceAsStream("kafka-server.properties"));
+            kafkaProperties.load(getClass().getClassLoader().getResourceAsStream("kafka-server.properties"));
             // override the Zookeeper url.
             kafkaProperties.setProperty("zookeeper.connect", getZkUrl());
             // override the kafka server port
@@ -114,7 +119,7 @@ public class KafkaStandalone {
             throw new RuntimeException("Error starting the server!");
         }
         try {
-            Thread.sleep(1000);   // add this sleep time to
+            Thread.sleep(3000);   // add this sleep time to
         } catch (InterruptedException e) {
         }
         logger.info("Completed the prepare phase.");
@@ -126,7 +131,7 @@ public class KafkaStandalone {
             adminClient = null;
         }
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         } catch (InterruptedException e) {
         }
         if (kafkaServer != null) {
